@@ -1,47 +1,66 @@
 import { StatusCodes } from "http-status-codes";
 import Category from "../models/category";
-
-export const getAllCategorys = async (req,res) => {
+import Product from "../models/product";
+import slugify from "slugify";
+export const create = async (req, res) => {
     try {
-        const categorys = await Category.find()
-        return res.status(200).json({message: "Lấy thông tin Category thành công:", categorys})
-    } catch (error) {
-        return res.status(500).json({essage: error.message})
-    }
-}
+        const categoy = await Category.create({
+            name: req.body.name,
+            slug: slugify(req.body.name, "-"),
+        });
 
-export const getCategoryById = async (req,res) => {
-    try {
-        const category = await Category.findById(req.params.id)
-        return res.status(200).json({message: "Lấy thông tin category thành công:", category})
+        return res.status(StatusCodes.CREATED).json(categoy);
     } catch (error) {
-        return res.status(500).json({essage: error.message})
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
     }
-}
+};
 
-export const addCategory = async (req,res) => {
+export const getAll = async (req, res) => {
     try {
-        const category = await Category.create(req.body)
-        return res.status(201).json({message: "Thêm category thành công:", category})
+        const categories = await Category.find({});
+        if (categories.length === 0) {
+            return res.status(StatusCodes.OK).json({ message: "Không có danh mục nào!" });
+        }
+        return res.status(StatusCodes.OK).json(categories);
     } catch (error) {
-         return res.status(500).json({message: error.message})
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
     }
-}
+};
 
-export const removeCategory = async (req,res) => {
+export const getCategoryById = async (req, res) => {
     try {
-        const category = await Category.findByIdAndDelete(req.params.id)
-        return res.status(200).json({message:"Xoá category thành công!", category})
-    } catch (error) {
-         return res.status(500).json({essage: error.message})
-    }
-}
+        const { id } = req.params; // Sử dụng destructuring để lấy id
+        const products = await Product.find({ category: id });
+        const category = await Category.findById(id);
 
-export const updateCategory = async (req,res) => {
-    try {
-        const category = await Category.findByIdAndUpdate(req.params.id, req.body, {new: true})
-        return res.status(200).json({message:"Update category thành công!", category})
+        if (!category) {
+            // Sửa điều kiện kiểm tra
+            return res.status(StatusCodes.NOT_FOUND).json({ message: "Không tìm thấy danh mục!" }); // Cập nhật thông điệp cho rõ ràng
+        }
+        return res.status(StatusCodes.OK).json({
+            category,
+            products,
+        });
     } catch (error) {
-           return res.status(500).json({essage: error.message})
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
     }
-}
+};
+export const deleteCategoryById = async (req, res) => {
+    try {
+        const category = await Category.findByIdAndDelete(req.params.id);
+        return res.status(StatusCodes.OK).json(category);
+    } catch (error) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
+    }
+};
+export const updateCategoryById = async (req, res) => {
+    try {
+        const category = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        return res.status(StatusCodes.OK).json(category);
+    } catch (error) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
+    }
+};
+
+// iphone 13 product max => /product/iphone-13-product-max
+// GET /product/:slug

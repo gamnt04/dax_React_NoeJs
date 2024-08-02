@@ -1,6 +1,17 @@
 import { StatusCodes } from "http-status-codes";
 import Cart from "../models/cart";
-
+export const updateTotals = function () {
+    this.totalQuantity = this.products.reduce((acc, item) => acc + item.quantity, 0);
+    this.totalPrice = this.products.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    this.totalDiscount = this.products.reduce(
+        (acc, item) => acc + item.discount * item.quantity,
+        0
+    );
+    this.finalTotalPrice = this.totalPrice - this.totalDiscount;
+};
+const findProductInCart = (cart, productId) => {
+    return cart.products.find((item) => item.productId.toString() === productId);
+};
 // Lấy danh sách sản phẩm thuộc 1 user
 export const getCartByUserId = async (req, res) => {
     const { userId } = req.params;
@@ -39,6 +50,7 @@ export const addItemToCart = async (req, res) => {
             // nếu sản phẩm chưa có trong giỏ hàng thì chúng ta thêm mới
             cart.products.push({ productId, quantity });
         }
+        cart.updateTotals(); // Update totals
         await cart.save();
         return res.status(StatusCodes.OK).json({ cart });
     } catch (error) {
@@ -58,7 +70,7 @@ export const removeFromCart = async (req, res) => {
         cart.products = cart.products.filter(
             (product) => product.productId && product.productId.toString() !== productId
         );
-
+        cart.updateTotals();
         await cart.save();
         return res.status(StatusCodes.OK).json({ cart });
     } catch (error) {
@@ -74,15 +86,21 @@ export const updateProductQuantity = async (req, res) => {
             return res.status(StatusCodes.NOT_FOUND).json({ error: "Cart not found" });
         }
 
-        const product = cart.products.find((item) => item.productId.toString() === productId);
+        const product = findProductInCart(cart, productId);
         if (!product) {
             return res.status(StatusCodes.NOT_FOUND).json({ error: "Product not found" });
         }
         product.quantity = quantity;
+
+        // Tự động cập nhật tổng số lượng và giá
+        cart.updateTotals();
         await cart.save();
         return res.status(StatusCodes.OK).json({ cart });
-    } catch (error) {}
+    } catch (error) {
+        return res.status(StatusCodes.BAD_REQUEST).json({ error: "Internal Server Error" });
+    }
 };
+
 // Tăng số lượng của sản phẩm trong giỏ hàng
 export const increaseProductQuantity = async (req, res) => {
     const { userId, productId } = req.body;
@@ -97,6 +115,7 @@ export const increaseProductQuantity = async (req, res) => {
         if (!product) {
             return res.status(404).json({ message: "Product not found in cart" });
         }
+        cart.updateTotals(); // Update totals
 
         product.quantity++;
 
@@ -124,6 +143,7 @@ export const decreaseProductQuantity = async (req, res) => {
         if (product.quantity > 1) {
             product.quantity--;
         }
+        cart.updateTotals(); // Update totals
 
         await cart.save();
         res.status(200).json(cart);

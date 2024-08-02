@@ -11,9 +11,9 @@ if (userDataString) {
     }
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getAllProducts = async (params?: any): Promise<IProduct[]> => {
+export const getAllProducts = async (): Promise<IProduct[]> => {
     try {
-        const response = await instance.get('/products', { params })
+        const response = await instance.get('/products')
         return response.data
     } catch (error) {
         return []
@@ -21,7 +21,7 @@ export const getAllProducts = async (params?: any): Promise<IProduct[]> => {
 }
 export const getProductById = async (id: number | string) => {
     try {
-        const response = await instance.get(`/products/${id}`)
+        const response = await instance.get(`/product/${id}`)
         return response.data
     } catch (error) {
         console.log(error)
@@ -29,7 +29,7 @@ export const getProductById = async (id: number | string) => {
 }
 export const addProduct = async (product: IProduct) => {
     try {
-        const response = await instance.post(`/products`, product, {
+        const response = await instance.post(`/product/add_product`, product, {
             headers: {
                 'Content-Type': 'application/json',
                 "Authorization": "Bearer " + token ? token : ''
@@ -42,7 +42,7 @@ export const addProduct = async (product: IProduct) => {
 }
 export const removeProduct = async (product: IProduct) => {
     try {
-        const response = await instance.delete(`/products/${product._id}`, {
+        const response = await instance.delete(`/product/${product._id}`, {
             headers: {
                 'Content-Type': 'application/json',
                 "Authorization": "Bearer " + token ? token : ''
@@ -55,7 +55,7 @@ export const removeProduct = async (product: IProduct) => {
 }
 export const editProduct = async (product: IProduct) => {
     try {
-        const response = await instance.put(`/products/${product._id}`, product, {
+        const response = await instance.put(`/product/${product._id}`, product, {
             headers: {
                 'Content-Type': 'application/json',
                 "Authorization": "Bearer " + token ? token : ''

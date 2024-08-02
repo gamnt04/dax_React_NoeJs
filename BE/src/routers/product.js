@@ -1,14 +1,19 @@
 import { Router } from "express";
 import {
+    create,
+    deleteProductById,
     getAllProducts,
     getProductById,
-    addProduct, removeProduct,updateProduct
+    related,
+    updateProductById,
 } from "../controllers/product";
+import { checkAuth } from "../middleware/checkAuth";
 
 const router = Router();
 router.get("/products", getAllProducts);
-router.get("/product/:id", getProductById);
-router.delete("/product/:id", removeProduct);
-router.put("/product/:id", updateProduct);
-router.post("/product/add_product", addProduct);
+router.get("/products/:id", getProductById);
+router.get("/products/:categoryId/related/:productId", related);
+router.delete("/products/:id", deleteProductById);
+router.put("/products/:id", updateProductById);
+router.post("/products", create);
 export default router;

@@ -1,10 +1,10 @@
 import React from "react";
-import ProductList from "./_components/list";
+import ProductList from "./List/Page";
 
 const ProductManagement = () => {
     return (
         <>
-            <ProductList />
+        <ProductList/>
         </>
     );
 };

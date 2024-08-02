@@ -10,22 +10,6 @@ const categorySchema = new Schema(
             unique: true,
             lowercase: true,
         },
-        // products: [
-        //     {
-        //         name: String,
-        //         image: String,
-        //         price: Number,
-        //          attributes: [
-        //     {
-        //        name: String,
-        //        quantity: Number,
-        //        required: true
-        //     },
-            
-        // ],
-
-        //     }
-        // ]
     },
     { timestamps: true, versionKey: false }
 );

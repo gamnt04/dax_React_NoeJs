@@ -1,11 +1,9 @@
-import { Toaster } from '@/components/ui/toaster'
 import Router from './routes'
-
+import {Button }from 'antd'
 function App() {
     return (
         <>
             <Router />
-            <Toaster />
         </>
     )
 }

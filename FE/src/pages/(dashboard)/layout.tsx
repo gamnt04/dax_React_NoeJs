@@ -1,23 +1,77 @@
-import { Outlet } from "react-router-dom";
-import Navbar from "./_components/Navbar";
-import Sidebar from "./_components/Sidebar";
+import React, { useState } from 'react';
+import {
+  DesktopOutlined,
+  FileOutlined,
+  PieChartOutlined,
+  TeamOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
+import type { MenuProps } from 'antd';
+import { Breadcrumb, Layout, Menu, theme } from 'antd';
+import { NavLink, Outlet } from 'react-router-dom';
 
-const LayoutAdmin = () => {
-    return (
-        <div className="h-full">
-            <div className="h-[80px] md:pl-56 fixed inset-y-0 w-full z-50 bg-white">
-                <Navbar />
-            </div>
-            <div className="hidden md:flex h-full w-56 flex-col fixed inset-y-0 z-50">
-                <Sidebar />
-            </div>
-            <main className="relative md:pl-56 pt-[80px] h-full z-10">
-                <div className="m-5">
-                    <Outlet />
-                </div>
-            </main>
-        </div>
-    );
+const { Header, Content, Footer, Sider } = Layout;
+
+type MenuItem = Required<MenuProps>['items'][number];
+
+function getItem(
+  label: React.ReactNode,
+  key: React.Key,
+  icon?: React.ReactNode,
+  children?: MenuItem[],
+): MenuItem {
+  return {
+    key,
+    icon,
+    children,
+    label,
+  } as MenuItem;
+}
+
+const items: MenuItem[] = [
+  getItem('Thống kê', '1', <PieChartOutlined />),
+  getItem('Sản phẩm', 'SP', <DesktopOutlined />, [
+    getItem(<NavLink to="products">Danh sách</NavLink>, 'SP-1'),
+    getItem(<NavLink to="products/add">Thêm sản phẩm</NavLink>, 'SP-2'),
+  ])
+];
+
+const LayoutAdmin: React.FC = () => {
+  const [collapsed, setCollapsed] = useState(false);
+  const {
+    token: { colorBgContainer, borderRadiusLG },
+  } = theme.useToken();
+
+  return (
+    <Layout style={{ minHeight: '100vh' }}>
+      <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
+        <div className="demo-logo-vertical" />
+        <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline" items={items} />
+      </Sider>
+      <Layout>
+        <Header style={{ padding: 0, background: colorBgContainer }} />
+        <Content style={{ margin: '0 16px' }}>
+          <Breadcrumb style={{ margin: '16px 0' }}>
+            <Breadcrumb.Item>User</Breadcrumb.Item>
+            <Breadcrumb.Item>Bill</Breadcrumb.Item>
+          </Breadcrumb>
+          <div
+            style={{
+              padding: 24,
+              minHeight: 360,
+              background: colorBgContainer,
+              borderRadius: borderRadiusLG,
+            }}
+          >
+           <Outlet/>
+          </div>
+        </Content>
+        <Footer style={{ textAlign: 'center' }}>
+          Ant Design ©{new Date().getFullYear()} Created by Ant UED
+        </Footer>
+      </Layout>
+    </Layout>
+  );
 };
 
 export default LayoutAdmin;
